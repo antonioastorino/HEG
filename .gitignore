@@ -1,0 +1,4 @@
+.vscode
+makeMakefile.sh
+prj-out*
+build
