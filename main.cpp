@@ -1,49 +1,12 @@
 
-#include <fstream>
+
 #include <iostream>
 #include <utility>
 #include <vector>
+#include "HEGDataTypes.hpp"
+#include "HEGEncoding.hpp"
 
 using freq_table = std::vector<std::pair<char, float>>;
-
-struct HuffmanEncoding {
-    long int index         = -1;
-    float freq             = 0;
-    HuffmanEncoding* left  = nullptr;
-    HuffmanEncoding* right = nullptr;
-};
-
-void makeSymbolFrequencyTable(freq_table& alphabet) {
-    std::ifstream file("assets/sample-text.txt");
-    std::string s = "";
-    char c;
-    int numOfChars = 0;
-    while (file.get(c)) {
-        numOfChars++;
-        s += c;
-    };
-    // sort
-    std::sort(s.begin(), s.begin() + numOfChars);
-
-    int i         = 0;
-    c             = s[i];
-    uint32_t freq = 0;
-    // populate the alphabet with symbol and correspondng frequency
-    while (s[i] != '\0') {
-        while (s[i] == c) {
-            freq++;
-            i++;
-        }
-        alphabet.push_back({c, static_cast<float>(freq) /* / static_cast<float>(numOfChars)*/});
-        c    = s[i];
-        freq = 0;
-    }
-
-    std::sort(alphabet.begin(), alphabet.end(),
-              [](const std::pair<char, float>& a, const std::pair<char, float>& b) {
-                  return a.second < b.second;
-              });
-}
 
 void makeTree(const std::vector<HuffmanEncoding*>& nodes, HuffmanEncoding& tree) {
     if (nodes.size() == 2) {
@@ -83,13 +46,12 @@ void printTree(const HuffmanEncoding* tree, const freq_table& alphabet, std::str
 
 int main() {
     std::cout << "Hello Huffman\n";
-    freq_table alphabet = {};
 
-    makeSymbolFrequencyTable(alphabet);
-    float totalP = 0;
+	HEG::Encoding encoding("assets/sample-text.txt");
+
+    auto alphabet = encoding.getAlphabet();
 
     for (auto it = alphabet.begin(); it != alphabet.end(); it++) {
-        totalP += it->second;
         std::cout << it->first << " " << it->second << "\n";
     }
 

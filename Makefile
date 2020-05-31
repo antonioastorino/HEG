@@ -4,7 +4,8 @@ CPPFLAGS=-c -Wextra -std=c++14 -O$(OPT) -g
 CFLAGS=-c -Wextra -O$(OPT) -g
 CPPC=g++
 CC=gcc
-INC=
+INC= -I.//include\
+
 .PHONY: all clean check-directory make-opt check-opt-value
 
 all: check-directory
@@ -25,10 +26,13 @@ make-opt:
 	fi
 	@make SHELL=/bin/bash prj-out-$(OPT) OPT=$(OPT)
 
-prj-out-$(OPT): build/objects/main.o
+prj-out-$(OPT): build/objects/main.o build/objects/HEGEncoding.o
 	$(CPPC) $(INC) -o $@ $^
 
-build/objects/main.o: ./main.cpp 
+build/objects/main.o: ./main.cpp .//include/HEGDataTypes.hpp .//include/HEGEncoding.hpp 
+	$(CPPC) $(INC) $(CPPFLAGS) $< -o $@
+
+build/objects/HEGEncoding.o: .//src/HEGEncoding.cpp .//include/HEGEncoding.hpp .//include/HEGDataTypes.hpp 
 	$(CPPC) $(INC) $(CPPFLAGS) $< -o $@
 
 clean:
