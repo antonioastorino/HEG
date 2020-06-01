@@ -19,12 +19,12 @@ HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_(
     this->makeTree(leaves_);
 }
 
-std::string HEG::Encoding::intToStirng(int c) {
+std::string HEG::Encoding::charToString(char c) {
         std::stringstream s;
         if (c < 33 || c > 126) {
-            s << "ch(" << c << ")";
+            s << "ch(" <<  static_cast<int>(c) << ")";
         } else {
-            s << static_cast<char>(c);
+            s << c;
         }
 		return s.str();
 }
@@ -115,20 +115,20 @@ void HEG::Encoding::printAlphabet() {
     std::cout << "Symbol\t|  Frequency\n";
     std::cout << "--------+-----------\n";
     for (auto it = alphabet_.begin(); it != alphabet_.end(); it++) {
-        std::cout << intToStirng(it->first) << "\t|  " << it->second << "\n";
+        std::cout << charToString(it->first) << "\t|  " << it->second << "\n";
     }
     std::cout << "--------+-----------\n";
 }
 
 void HEG::Encoding::printTree(const HuffmanEncoding* tree, std::string code) {
     if (tree->left == nullptr) {
-        std::cout << code << " -> " << intToStirng(alphabet_[tree->index].first) << " \n";
+        std::cout << code << " -> " << charToString(alphabet_[tree->index].first) << " \n";
         return;
     } else {
         printTree(tree->left, code + "0");
     }
     if (tree->right == nullptr) {
-        std::cout << " " << intToStirng(alphabet_[tree->index].first) << " \n";
+        std::cout << " " << charToString(alphabet_[tree->index].first) << " \n";
         return;
     } else {
         printTree(tree->right, code + "1");
