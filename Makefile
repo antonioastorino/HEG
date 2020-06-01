@@ -1,12 +1,10 @@
 # Makefile auto generated using custom generator
 
-CPPFLAGS=-c -Wextra -std=c++14 -O$(OPT) -g
-CFLAGS=-c -Wextra -O$(OPT) -g
-CPPC=g++
-CC=gcc
+CFLAGS=-c -Wextra -std=c++17 -O$(OPT) -g
+CC=g++
 INC= -I.//include\
 
-.PHONY: all clean check-directory make-opt check-opt-value
+.PHONY: all clean cleanall check-directory make-opt check-opt-value
 
 all: check-directory
 
@@ -24,16 +22,29 @@ make-opt:
 		mkdir -p build/objects; \
 		touch build/.out-$(OPT); \
 	fi
-	@make SHELL=/bin/bash prj-out-$(OPT) OPT=$(OPT)
+	@make SHELL=/bin/bash build/test-out-$(OPT) OPT=$(OPT)
+	@make SHELL=/bin/bash build/prj-out-$(OPT) OPT=$(OPT)
 
-prj-out-$(OPT): build/objects/main.o build/objects/HEGEncoding.o
-	$(CPPC) $(INC) -o $@ $^
+build/test-out-$(OPT): build/objects/test-decoding.o build/objects/HEGMap.o build/objects/HEGEncoding.o
+	$(CC) $(INC) -o $@ $^
 
-build/objects/main.o: ./main.cpp .//include/HEGDataTypes.hpp .//include/HEGEncoding.hpp 
-	$(CPPC) $(INC) $(CPPFLAGS) $< -o $@
+build/prj-out-$(OPT): build/objects/HEGMap.o build/objects/prj-main.o build/objects/HEGEncoding.o
+	$(CC) $(INC) -o $@ $^
+
+build/objects/test-decoding.o: .//tests/test-decoding.cpp .//include/HEGMap.hpp .//include/HEGEncoding.hpp 
+	$(CC) $(INC) $(CFLAGS) $< -o $@
+
+build/objects/HEGMap.o: .//src/HEGMap.cpp .//include/HEGMap.hpp 
+	$(CC) $(INC) $(CFLAGS) $< -o $@
+
+build/objects/prj-main.o: .//src/prj-main.cpp .//include/HEGDataTypes.hpp .//include/HEGEncoding.hpp 
+	$(CC) $(INC) $(CFLAGS) $< -o $@
 
 build/objects/HEGEncoding.o: .//src/HEGEncoding.cpp .//include/HEGEncoding.hpp .//include/HEGDataTypes.hpp 
-	$(CPPC) $(INC) $(CPPFLAGS) $< -o $@
+	$(CC) $(INC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf build prj-out-*
+	rm -rf build
+
+cleanall:
+	rm -rf build data/*.txt

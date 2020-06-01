@@ -16,20 +16,20 @@ private:
 
     void makeSymbolFrequencyTable(const char* filename);
     void makeTree(const std::vector<HuffmanEncoding*>&);
-    void printTree(const HuffmanEncoding* tree, std::string code);
-	std::string charToString(char);
+    void printTree(const HuffmanEncoding* tree, std::string code, std::ostream&);
+    std::string charToString(char);
 
 public:
     Encoding(const char*);
     ~Encoding();
     alphabet_t getAlphabet() const;
-    
-	// Read through the alphabet and print each symbol and corresponding freqency
-	void printAlphabet();
 
-	// Scan the tree using DFS and print a "0" for each left node and "1" for each right node. Return when you hit the bottom.
-    void printEncoding();
-	
+    // Read through the alphabet and print each symbol and corresponding freqency
+    void printAlphabet();
+
+    // Scan the tree using DFS and print a "0" for each left node and "1" for each right node.
+    // Return when you hit the bottom. Prints to file if a file name is specified
+    void printEncoding(const char* outFileName = "");
 };
 
 } // namespace HEG

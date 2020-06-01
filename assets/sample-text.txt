@@ -14,7 +14,7 @@ In most cases, declarations that are not used outside a single source file are i
 Use suffix -doc.h for files that contain only Doxygen documentation for some module or such, for cases where there is no natural single header for putting the documentation.
 
 For C++ files, prefer naming the file the same as the (main) class it contains. Currently all file names are all-lowercase, even though class names contain capital letters. It is OK to use commonly known abbreviations, and/or omit the name of the containing directory if that would cause unnecessary repetition (e.g., as a common prefix to every file name in the directory) and the remaining part of the name is unique enough.
-
+4
 Avoid having multiple files with the same name in different places within the same library. In addition to making things harder to find, C++ source files with the same name can cause obscure problems with some compilers. Currently, unit tests are an exception to the rule (there is only one particular compiler that had problems with this, and a workaround is possible if/when that starts to affect more than a few of the test files).
 
 Common guidelines for C and C++ code

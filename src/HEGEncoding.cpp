@@ -20,13 +20,13 @@ HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_(
 }
 
 std::string HEG::Encoding::charToString(char c) {
-        std::stringstream s;
-        if (c < 33 || c > 126) {
-            s << "ch(" <<  static_cast<int>(c) << ")";
-        } else {
-            s << c;
-        }
-		return s.str();
+    std::stringstream s;
+    if (c < 33 || c > 126) {
+        s << "ch(" << static_cast<int>(c) << ")";
+    } else {
+        s << c;
+    }
+    return s.str();
 }
 
 HEG::Encoding::~Encoding() {
@@ -109,7 +109,14 @@ void HEG::Encoding::makeTree(const std::vector<HuffmanEncoding*>& tmp_nodes) {
     }
 }
 
-void HEG::Encoding::printEncoding() { this->printTree(&tree_, ""); }
+void HEG::Encoding::printEncoding(const char* outFileName) {
+    if (outFileName[0] == 0) { this->printTree(&tree_, "", std::cout); }
+	else {
+		  std::ofstream file(outFileName);
+		  this->printTree(&tree_, "", file);
+		  file.close();
+	}
+}
 
 void HEG::Encoding::printAlphabet() {
     std::cout << "Symbol\t|  Frequency\n";
@@ -120,17 +127,15 @@ void HEG::Encoding::printAlphabet() {
     std::cout << "--------+-----------\n";
 }
 
-void HEG::Encoding::printTree(const HuffmanEncoding* tree, std::string code) {
+void HEG::Encoding::printTree(const HuffmanEncoding* tree, std::string code,
+                              std::ostream& outstream) {
     if (tree->left == nullptr) {
-        std::cout << code << " -> " << charToString(alphabet_[tree->index].first) << " \n";
+        outstream << code << " " << static_cast<int>(alphabet_[tree->index].first) << "\n";
         return;
     } else {
-        printTree(tree->left, code + "0");
+        printTree(tree->left, code + "0", outstream);
     }
-    if (tree->right == nullptr) {
-        std::cout << " " << charToString(alphabet_[tree->index].first) << " \n";
-        return;
-    } else {
-        printTree(tree->right, code + "1");
-    }
+    // NOTE: no need to check if right == nullptr because it would be only when left = nullptr,
+    // already checked above
+    printTree(tree->right, code + "1", outstream);
 }
