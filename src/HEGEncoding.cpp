@@ -1,5 +1,6 @@
 #include "HEGEncoding.hpp"
 #include "HEGDataTypes.hpp"
+#include "HEGLog.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -110,12 +111,13 @@ void HEG::Encoding::makeTree(const std::vector<HuffmanEncoding*>& tmp_nodes) {
 }
 
 void HEG::Encoding::printEncoding(const char* outFileName) {
-    if (outFileName[0] == 0) { this->printTree(&tree_, "", std::cout); }
-	else {
-		  std::ofstream file(outFileName);
-		  this->printTree(&tree_, "", file);
-		  file.close();
-	}
+    if (outFileName[0] == 0) {
+        this->printTree(&tree_, "", std::cout);
+    } else {
+        std::ofstream file(outFileName);
+        this->printTree(&tree_, "", file);
+        file.close();
+    }
 }
 
 void HEG::Encoding::printAlphabet() {
@@ -139,3 +141,43 @@ void HEG::Encoding::printTree(const HuffmanEncoding* tree, std::string code,
     // already checked above
     printTree(tree->right, code + "1", outstream);
 }
+
+template <typename T>
+void HEG::Encoding::decode(const std::vector<T>& data, size_t startBit, size_t endBit,
+                           std::string& out_msg) {
+    bool currBitValue;
+    auto ptr = &this->tree_; // pointer to the current node in the tree
+    if (ptr->left == nullptr) throw "Empty encoding!";
+    out_msg                       = "";
+    const uint8_t bytesPerElement = sizeof(data[0]);
+    const uint8_t bitsPerElement  = bytesPerElement * 8; // num of bytes per element * 8
+    for (size_t elementIndex = startBit / bitsPerElement; elementIndex < data.size();
+         elementIndex++) {
+        for (size_t bit = startBit % bitsPerElement; bit < bitsPerElement; bit++) {
+            if (bit > endBit) return;
+            currBitValue = (data[elementIndex] >> bit) & 1;
+
+            if (currBitValue == false) {
+                ptr = ptr->left;
+                HEG::Logger::info("Got false, going left");
+            } else {
+                ptr = ptr->right;
+                HEG::Logger::info("Got true, going right");
+            }
+
+            if (ptr->index != -1) { // a leave is reached
+                char symbol = this->alphabet_[ptr->index].first;
+                out_msg += symbol; // add the corresponding symble to out_msg
+                std::stringstream s;
+                s <<"Leave with symbol " << symbol << " reached\n";
+                HEG::Logger::info(s.str().c_str());
+                ptr = &this->tree_; // reset ptr to the root of the tree
+            }
+        }
+    }
+}
+
+template void HEG::Encoding::decode(const std::vector<uint8_t>&, size_t, size_t, std::string&);
+template void HEG::Encoding::decode(const std::vector<uint16_t>&, size_t, size_t, std::string&);
+template void HEG::Encoding::decode(const std::vector<uint32_t>&, size_t, size_t, std::string&);
+template void HEG::Encoding::decode(const std::vector<uint64_t>&, size_t, size_t, std::string&);

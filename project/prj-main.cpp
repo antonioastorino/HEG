@@ -10,13 +10,13 @@
 int main() {
     std::cout << "Hello Huffman\n";
 
-	HEG::Encoding encoding("assets/sample-text.txt");
+	HEG::Encoding encoding("../assets/sample-text.txt");
 
     auto alphabet = encoding.getAlphabet();
 
 	encoding.printAlphabet();
 
-	encoding.printEncoding();
+	encoding.printEncoding("../data/huffman-code.txt");
 
     return 0;
 }

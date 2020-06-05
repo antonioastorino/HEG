@@ -30,6 +30,8 @@ public:
     // Scan the tree using DFS and print a "0" for each left node and "1" for each right node.
     // Return when you hit the bottom. Prints to file if a file name is specified
     void printEncoding(const char* outFileName = "");
+    template <typename T> 
+    void decode(const std::vector<T>&, size_t, size_t, std::string&);
 };
 
 } // namespace HEG
