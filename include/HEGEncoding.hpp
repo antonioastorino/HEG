@@ -17,7 +17,7 @@ private:
     void makeSymbolFrequencyTable(const char* filename);
     void makeTree(const std::vector<HuffmanEncoding*>&);
     void printTree(const HuffmanEncoding* tree, std::string code, std::ostream&);
-    std::string charToString(char);
+    std::string charToString(uint8_t);
 
 public:
     Encoding(const char*);

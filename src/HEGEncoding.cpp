@@ -20,7 +20,7 @@ HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_(
     this->makeTree(leaves_);
 }
 
-std::string HEG::Encoding::charToString(char c) {
+std::string HEG::Encoding::charToString(uint8_t c) {
     std::stringstream s;
     if (c < 33 || c > 126) {
         s << "ch(" << static_cast<int>(c) << ")";
@@ -66,14 +66,14 @@ void HEG::Encoding::makeSymbolFrequencyTable(const char* filename) {
 
     int i         = 0;
     c             = s[i];
-    uint32_t freq = 0;
+    uint64_t freq = 0;
     // populate the alphabet with symbol and correspondng frequency
     while (s[i] != '\0') {
         while (s[i] == c) {
             freq++;
             i++;
         }
-        alphabet_.push_back({c, static_cast<float>(freq) /* / static_cast<float>(numOfChars)*/});
+        alphabet_.push_back({c, freq});
         c    = s[i];
         freq = 0;
     }
@@ -147,32 +147,31 @@ void HEG::Encoding::decode(const std::vector<T>& data, size_t startBit, size_t e
                            std::string& out_msg) {
     bool currBitValue;
     auto ptr = &this->tree_; // pointer to the current node in the tree
-    if (ptr->left == nullptr) throw "Empty encoding!";
-    out_msg                       = "";
-    const uint8_t bytesPerElement = sizeof(data[0]);
-    const uint8_t bitsPerElement  = bytesPerElement * 8; // num of bytes per element * 8
-    for (size_t elementIndex = startBit / bitsPerElement; elementIndex < data.size();
-         elementIndex++) {
-        for (size_t bit = startBit % bitsPerElement; bit < bitsPerElement; bit++) {
-            if (bit > endBit) return;
-            currBitValue = (data[elementIndex] >> bit) & 1;
+    if (ptr->left == nullptr) HEG::Logger::error("Empty encoding!");
+    out_msg                           = "";
+    constexpr uint8_t bytesPerElement = sizeof(data[0]);
+    constexpr uint8_t bitsPerElement  = bytesPerElement * 8; // num of bytes per element * 8
+    const uint64_t totalNumOfBits  = bitsPerElement * data.size();
+    for (size_t currBit = startBit; currBit < totalNumOfBits && currBit <= endBit; currBit++) {
+        uint64_t currElement = currBit / bitsPerElement;
+        uint8_t scanner      = currBit % bitsPerElement;
+        currBitValue         = (data[currElement] >> scanner) & 1;
 
-            if (currBitValue == false) {
-                ptr = ptr->left;
-                HEG::Logger::info("Got false, going left");
-            } else {
-                ptr = ptr->right;
-                HEG::Logger::info("Got true, going right");
-            }
+        if (currBitValue == false) {
+            ptr = ptr->left;
+            HEG::Logger::debug("Got false, going left");
+        } else {
+            ptr = ptr->right;
+            HEG::Logger::debug("Got true, going right");
+        }
 
-            if (ptr->index != -1) { // a leave is reached
-                char symbol = this->alphabet_[ptr->index].first;
-                out_msg += symbol; // add the corresponding symble to out_msg
-                std::stringstream s;
-                s <<"Leave with symbol " << symbol << " reached\n";
-                HEG::Logger::info(s.str().c_str());
-                ptr = &this->tree_; // reset ptr to the root of the tree
-            }
+        if (ptr->index != -1) { // a leave is reached
+            char symbol = this->alphabet_[ptr->index].first;
+            out_msg += symbol; // add the corresponding symble to out_msg
+            std::stringstream s;
+            s << "Leave with symbol " << symbol << " reached";
+            HEG::Logger::info(s.str().c_str());
+            ptr = &this->tree_; // reset ptr to the root of the tree
         }
     }
 }

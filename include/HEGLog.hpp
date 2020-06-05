@@ -6,13 +6,14 @@
 #define DEBUG 	2
 // clang-format on
 
-#define LOG_LEVEL DEBUG
+#define LOG_LEVEL INFO
 
 namespace HEG {
 class Logger {
 public:
-static void info(const char *);
 static void error(const char *);
+static void info(const char *);
+static void debug(const char *);
 	
 };
 } // namespace HEG

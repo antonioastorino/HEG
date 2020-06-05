@@ -1,4 +1,5 @@
 .vscode
 makeMakefile.sh
 prj-out*
+test-out*
 build
