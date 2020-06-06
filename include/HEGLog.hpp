@@ -6,7 +6,7 @@
 #define DEBUG 	2
 // clang-format on
 
-#define LOG_LEVEL INFO
+#define LOG_LEVEL RELEASE
 
 namespace HEG {
 class Logger {

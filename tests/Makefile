@@ -29,7 +29,7 @@ make-opt:
 .//test-out-$(OPT): ../build/objects/test-encoding.o ../build/objects/HEGMap.o ../build/objects/BinayMessageBuilder.o ../build/objects/HEGLog.o ../build/objects/HEGEncoding.o
 	$(CPPC) $(INC) -o $@ $^
 
-../build/objects/test-encoding.o: ./test-encoding.cpp ../include/HEGEncoding.hpp ../include/HEGMap.hpp ../include/BinaryMessageBuilder.hpp 
+../build/objects/test-encoding.o: ./test-encoding.cpp ../include/BinaryMessageBuilder.hpp ../include/HEGEncoding.hpp ../include/HEGMap.hpp 
 	$(CPPC) $(INC) $(CPPFLAGS) $< -o $@
 
 ../build/objects/HEGMap.o: ../src/HEGMap.cpp ../include/HEGMap.hpp 

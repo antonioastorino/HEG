@@ -18,6 +18,7 @@ HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_(
         leaves_.push_back(leave);
     }
     this->makeTree(leaves_);
+    this->p_currNode_ = &this->tree_;
 }
 
 std::string HEG::Encoding::charToString(uint8_t c) {
@@ -146,33 +147,32 @@ template <typename T>
 void HEG::Encoding::decode(const std::vector<T>& data, size_t startBit, size_t endBit,
                            std::string& out_msg) {
     bool currBitValue;
-    auto ptr = &this->tree_; // pointer to the current node in the tree
-    if (ptr->left == nullptr) HEG::Logger::error("Empty encoding!");
-    out_msg                           = "";
+    if (p_currNode_->left == nullptr) HEG::Logger::error("Empty encoding!");
     constexpr uint8_t bytesPerElement = sizeof(data[0]);
     constexpr uint8_t bitsPerElement  = bytesPerElement * 8; // num of bytes per element * 8
-    const uint64_t totalNumOfBits  = bitsPerElement * data.size();
+    const uint64_t totalNumOfBits     = bitsPerElement * data.size();
     for (size_t currBit = startBit; currBit < totalNumOfBits && currBit <= endBit; currBit++) {
         uint64_t currElement = currBit / bitsPerElement;
         uint8_t scanner      = currBit % bitsPerElement;
         currBitValue         = (data[currElement] >> scanner) & 1;
 
         if (currBitValue == false) {
-            ptr = ptr->left;
+            p_currNode_ = p_currNode_->left;
             HEG::Logger::debug("Got false, going left");
         } else {
-            ptr = ptr->right;
+            p_currNode_ = p_currNode_->right;
             HEG::Logger::debug("Got true, going right");
         }
 
-        if (ptr->index != -1) { // a leave is reached
-            char symbol = this->alphabet_[ptr->index].first;
+        if (p_currNode_->index != -1) { // a leave is reached
+            uint8_t symbol = this->alphabet_[p_currNode_->index].first;
             out_msg += symbol; // add the corresponding symble to out_msg
             std::stringstream s;
             s << "Leave with symbol " << symbol << " reached";
             HEG::Logger::info(s.str().c_str());
-            ptr = &this->tree_; // reset ptr to the root of the tree
+            p_currNode_ = &this->tree_; // reset p_currNode_ to the root of the tree
         }
+        // TODO: reset and exit if null is transmitted
     }
 }
 

@@ -4,6 +4,9 @@
 #include <string>
 
 namespace HEG {
+/**
+ * Note: incomplete messages are zero-padded.
+ */
 
 class Encoding {
 private:
@@ -13,6 +16,7 @@ private:
     HuffmanEncoding tree_;                 // entry point to the encoding tree
     std::vector<HuffmanEncoding*> leaves_; // leaves of the tree
     std::vector<HuffmanEncoding*> nodes_;  // nodes of the tree
+    HuffmanEncoding* p_currNode_;          // points to a tree node scanning for a symbol
 
     void makeSymbolFrequencyTable(const char* filename);
     void makeTree(const std::vector<HuffmanEncoding*>&);
@@ -30,8 +34,8 @@ public:
     // Scan the tree using DFS and print a "0" for each left node and "1" for each right node.
     // Return when you hit the bottom. Prints to file if a file name is specified
     void printEncoding(const char* outFileName = "");
-    template <typename T> 
-    void decode(const std::vector<T>&, size_t, size_t, std::string&);
+    template <typename T> void decode(const std::vector<T>&, size_t, size_t, std::string&);
+    void resetCurrNodePtr();
 };
 
 } // namespace HEG
