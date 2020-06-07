@@ -5,6 +5,9 @@
 #include <iostream>
 #include <sstream>
 #include <wchar.h>
+#ifdef __linux__
+#include <algorithm>
+#endif
 
 HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_({}), nodes_({}) {
     // create a list of symbols and corresponding frequencies
@@ -21,7 +24,6 @@ HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_(
     this->makeTree(leaves_);
     this->p_currNode_ = &this->tree_;
 }
-
 
 HEG::Encoding::~Encoding() {
     // delete all leaves
@@ -141,8 +143,8 @@ void HEG::Encoding::printTree(const HuffmanEncoding* tree, std::string code,
     } else {
         printTree(tree->left, code + "0", outstream);
     }
-    // NOTE: no need to check if right == nullptr because it would be only when left = nullptr,
-    // already checked above
+    // NOTE: no need to check if right == nullptr because it would be only when
+    // left = nullptr, already checked above
     printTree(tree->right, code + "1", outstream);
 }
 

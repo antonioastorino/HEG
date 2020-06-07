@@ -1,6 +1,9 @@
 #ifndef HEGDataTypes_hpp
 #define HEGDataTypes_hpp
 #include <vector>
+#ifdef __linux__
+#include <cstdint>
+#endif
 
 typedef std::pair<uint8_t, uint64_t> symbol_t;
 typedef std::vector<symbol_t> alphabet_t;
