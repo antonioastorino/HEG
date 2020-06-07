@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <wchar.h>
 
 HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_({}), nodes_({}) {
     // create a list of symbols and corresponding frequencies
@@ -21,15 +22,6 @@ HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_(
     this->p_currNode_ = &this->tree_;
 }
 
-std::string HEG::Encoding::charToString(uint8_t c) {
-    std::stringstream s;
-    if (c < 33 || c > 126) {
-        s << "ch(" << static_cast<int>(c) << ")";
-    } else {
-        s << c;
-    }
-    return s.str();
-}
 
 HEG::Encoding::~Encoding() {
     // delete all leaves
@@ -79,6 +71,10 @@ void HEG::Encoding::makeSymbolFrequencyTable(const char* filename) {
         freq = 0;
     }
 
+    alphabet_.push_back({'\0', -1}); // add char `0` with highest possible frequency to access it
+                                     // quickly as a message terminator
+
+    // sort by frequency as needed by Huffman's algorithm
     std::sort(alphabet_.begin(), alphabet_.end(),
               [](const symbol_t& a, const symbol_t& b) { return a.second < b.second; });
 }
@@ -124,8 +120,15 @@ void HEG::Encoding::printEncoding(const char* outFileName) {
 void HEG::Encoding::printAlphabet() {
     std::cout << "Symbol\t|  Frequency\n";
     std::cout << "--------+-----------\n";
+    setlocale(LC_CTYPE, "UTF-8");
     for (auto it = alphabet_.begin(); it != alphabet_.end(); it++) {
-        std::cout << charToString(it->first) << "\t|  " << it->second << "\n";
+        if (it->first < 33 || it->first == 127) {
+            std::cout << "ch(" << static_cast<int>(it->first) << ")"
+                      << "\t|  " << it->second << "\n";
+
+        } else {
+            wprintf(L"%lc\t|  %lu\n", static_cast<wchar_t>(it->first), it->second);
+        }
     }
     std::cout << "--------+-----------\n";
 }
