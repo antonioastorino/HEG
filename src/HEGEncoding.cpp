@@ -171,6 +171,10 @@ void HEG::Encoding::decode(const std::vector<T>& data, size_t startBit, size_t e
 
         if (p_currNode_->index != -1) { // a leave is reached
             uint8_t symbol = this->alphabet_[p_currNode_->index].first;
+            if (symbol == '\0') {
+                this->p_currNode_ = &this->tree_;
+                return;
+            }
             out_msg += symbol; // add the corresponding symble to out_msg
             std::stringstream s;
             s << "Leave with symbol " << symbol << " reached";

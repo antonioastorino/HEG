@@ -7,8 +7,8 @@
 int main() {
     std::cout << "-------- Huffman's encoding test. --------\n";
 
-    // The following is be done in preparation for the transmission and could be skipped once the encoding is
-    // established and saved.
+    // The following is be done in preparation for the transmission and could be skipped once the
+    // encoding is established and saved.
     std::cout << "Creating encoding based on the content of a file...\n";
     HEG::Encoding encoding("../assets/sample-text.txt");
     std::cout << "Done!\n";
@@ -26,7 +26,6 @@ int main() {
     std::cout << "Loading encoded alphabet from file...\n";
     HEG::Map mp(encodingFileName);
     std::cout << "Done!\n";
-
 
     std::cout << "Converting message into bit stream...\n";
     std::string clearMsg   = "@&#^#$%^$%#&$Hello Huffman!!"; // Message to be transmitted
@@ -46,7 +45,6 @@ int main() {
     std::string receivedMsg = "";
     encoding.decode(data, 0, data.size() * sizeof(data[0]) * 8 - 1, receivedMsg);
     std::cout << "Done!\n";
-
 
     std::cout << "Message sent     :\t" << clearMsg << "\n";
     std::cout << "Message received :\t" << receivedMsg << "\n";
