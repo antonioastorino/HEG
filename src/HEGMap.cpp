@@ -24,17 +24,18 @@ HEG::Map::Map(const char* filename) {
         }
         i++; // skip the space
         char symbol = 0;
+        // string convert to decimal
         while (s[i] != '\n') { // eol-separator
             symbol *= 10;      // shift by 4 bits
-            symbol += (s[i] - 48);
+            symbol += (s[i] - '0');
             i++;
         }
-        mp_[symbol] = code;
+        this->mp_[symbol] = code;
         i++;
     }
 }
 
 std::string HEG::Map::getCodeForSymbol(char symbol) {
-	return mp_[symbol];
+	return this->mp_[symbol];
 }
 

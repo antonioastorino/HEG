@@ -12,8 +12,8 @@
 HEG::Encoding::Encoding(const char* filename) : alphabet_({}), tree_(), leaves_({}), nodes_({}) {
     // create a list of symbols and corresponding frequencies
     this->makeSymbolFrequencyTable(filename);
-    // create a leave in for the tree for each symbol
 
+    // create one leave in the tree for each symbol
     leaves_.reserve(alphabet_.size());
     for (size_t i = 0; i < alphabet_.size(); i++) {
         HuffmanEncoding* leave = new HuffmanEncoding();
@@ -82,12 +82,16 @@ void HEG::Encoding::makeSymbolFrequencyTable(const char* filename) {
 }
 
 void HEG::Encoding::makeTree(const std::vector<HuffmanEncoding*>& tmp_nodes) {
+    // Recursively, pairs of nodes are connected to a parent from the leaves to the head. If only
+    // two nodes don't have a parent, the parent must be the root of the tree.
     if (tmp_nodes.size() == 2) {
         tree_.right = tmp_nodes[0];
         tree_.left  = tmp_nodes[1];
         tree_.freq  = tmp_nodes[0]->freq + tmp_nodes[1]->freq;
     } else {
-        // add a node to the tree
+        // Add a parent node to the tree and assign as children the nodes with highest frequency.
+        // Because the nodes are sorted at each iteration, the highest frequencies are at the first
+        // and the second node in the vector.
         HuffmanEncoding* node = new HuffmanEncoding();
         nodes_.push_back(node);
 
@@ -96,7 +100,8 @@ void HEG::Encoding::makeTree(const std::vector<HuffmanEncoding*>& tmp_nodes) {
         node->left  = tmp_nodes[1];                            // connect to left child
         node->freq  = tmp_nodes[0]->freq + tmp_nodes[1]->freq; // get frequency from the children
 
-        // create a vector of nodes for the new makeTree() call
+        // Create a vector of nodes for the new makeTree() call. The vector contains all the nodes
+        // that don't have a parent yet, namely those from the 3rd on.
         std::vector<HuffmanEncoding*> newNodes;
         newNodes.push_back(node);
         for (size_t i = 2; i < tmp_nodes.size(); i++) { newNodes.push_back(tmp_nodes[i]); }
@@ -109,7 +114,11 @@ void HEG::Encoding::makeTree(const std::vector<HuffmanEncoding*>& tmp_nodes) {
     }
 }
 
-void HEG::Encoding::printEncoding(const char* outFileName) {
+void HEG::Encoding::printEncoding(const char* outFileName) const {
+    // Inspect all the nodes using DFS and print the encoding by associating a '0' to a inspecting a
+    // left child and a '1' otherwise
+    // If an output file name is not provided, the encoding will be printed to the stardad output,
+    // otherwise to the specified file
     if (outFileName[0] == 0) {
         this->printTree(&tree_, "", std::cout);
     } else {
@@ -119,7 +128,9 @@ void HEG::Encoding::printEncoding(const char* outFileName) {
     }
 }
 
-void HEG::Encoding::printAlphabet() {
+void HEG::Encoding::printAlphabet() const {
+    // The list of symbols and corresponding frequencies is printed using wprintf to display
+    // extended ASCII chars
     std::cout << "Symbol\t|  Frequency\n";
     std::cout << "--------+-----------\n";
     setlocale(LC_CTYPE, "UTF-8");
@@ -136,9 +147,9 @@ void HEG::Encoding::printAlphabet() {
 }
 
 void HEG::Encoding::printTree(const HuffmanEncoding* tree, std::string code,
-                              std::ostream& outstream) {
+                              std::ostream& outstream) const {
     if (tree->left == nullptr) {
-        outstream << code << " " << static_cast<int>(alphabet_[tree->index].first) << "\n";
+        outstream << code << " " << static_cast<int>(alphabet_.at(tree->index).first) << "\n";
         return;
     } else {
         printTree(tree->left, code + "0", outstream);
@@ -149,28 +160,29 @@ void HEG::Encoding::printTree(const HuffmanEncoding* tree, std::string code,
 }
 
 template <typename T>
-void HEG::Encoding::decode(const std::vector<T>& data, size_t startBit, size_t endBit,
+void HEG::Encoding::decode(const std::vector<T>& data, const size_t startBit, const size_t endBit,
                            std::string& out_msg) {
     bool currBitValue;
     if (p_currNode_->left == nullptr) HEG::Logger::error("Empty encoding!");
     constexpr uint8_t bytesPerElement = sizeof(data[0]);
     constexpr uint8_t bitsPerElement  = bytesPerElement * 8; // num of bytes per element * 8
     const uint64_t totalNumOfBits     = bitsPerElement * data.size();
+
     for (size_t currBit = startBit; currBit < totalNumOfBits && currBit <= endBit; currBit++) {
         uint64_t currElement = currBit / bitsPerElement;
         uint8_t scanner      = currBit % bitsPerElement;
-        currBitValue         = (data[currElement] >> scanner) & 1;
+        currBitValue         = (data.at(currElement) >> scanner) & 1;
 
         if (currBitValue == false) {
             p_currNode_ = p_currNode_->left;
-            HEG::Logger::debug("Got false, going left");
+            HEG::Logger::debug("Got 0, going left");
         } else {
             p_currNode_ = p_currNode_->right;
-            HEG::Logger::debug("Got true, going right");
+            HEG::Logger::debug("Got 1, going right");
         }
 
         if (p_currNode_->index != -1) { // a leave is reached
-            uint8_t symbol = this->alphabet_[p_currNode_->index].first;
+            uint8_t symbol = this->alphabet_.at(p_currNode_->index).first;
             if (symbol == '\0') {
                 this->p_currNode_ = &this->tree_;
                 return;
@@ -179,7 +191,7 @@ void HEG::Encoding::decode(const std::vector<T>& data, size_t startBit, size_t e
             std::stringstream s;
             s << "Leave with symbol " << symbol << " reached";
             HEG::Logger::info(s.str().c_str());
-            p_currNode_ = &this->tree_; // reset p_currNode_ to the root of the tree
+            this->p_currNode_ = &this->tree_; // reset p_currNode_ to the root of the tree
         }
         // TODO: reset and exit if null is transmitted
     }

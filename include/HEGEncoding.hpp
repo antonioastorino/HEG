@@ -20,7 +20,7 @@ private:
 
     void makeSymbolFrequencyTable(const char* filename);
     void makeTree(const std::vector<HuffmanEncoding*>&);
-    void printTree(const HuffmanEncoding* tree, std::string code, std::ostream&);
+    void printTree(const HuffmanEncoding* tree, std::string code, std::ostream&) const;
 
 public:
     Encoding(const char*);
@@ -28,13 +28,15 @@ public:
     alphabet_t getAlphabet() const;
 
     // Read through the alphabet and print each symbol and corresponding freqency
-    void printAlphabet();
+    void printAlphabet() const;
 
     // Scan the tree using DFS and print a "0" for each left node and "1" for each right node.
     // Return when you hit the bottom. Prints to file if a file name is specified
-    void printEncoding(const char* outFileName = "");
-    template <typename T> void decode(const std::vector<T>&, size_t, size_t, std::string&);
-    void resetCurrNodePtr();
+    void printEncoding(const char* outFileName = "") const;
+
+    template <typename T>
+
+    void decode(const std::vector<T>&, const size_t, const size_t, std::string&);
 };
 
 } // namespace HEG
