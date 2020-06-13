@@ -1,4 +1,5 @@
 #include "HEGMap.hpp"
+#include <sstream>
 
 HEG::Map::Map(const char* filename) {
     std::string s = "";
@@ -7,35 +8,16 @@ HEG::Map::Map(const char* filename) {
 
     // open file for reading
     std::ifstream file(filename);
-    // Measure the length of the file and copy to string
-    while (file.get(c)) {
-        numOfChars++;
-        s += c;
-    };
-    file.close();
-
-	// Populate map
-    int i = 0;
-    while (s[i] != 0) {
-        std::string code = "";
-        while (s[i] != 32) { // space-separator
-            code += s[i];
-            i++;
-        }
-        i++; // skip the space
-        char symbol = 0;
-        // string convert to decimal
-        while (s[i] != '\n') { // eol-separator
-            symbol *= 10;      // shift by 4 bits
-            symbol += (s[i] - '0');
-            i++;
-        }
-        this->mp_[symbol] = code;
-        i++;
+    // convert each line read into a map element
+    std::string line;
+    while (std::getline(file, line)) {
+        std::string code;
+        int symbol;
+        std::istringstream iss(line);
+        iss >> code >> symbol;
+        this->mp_[static_cast<uint8_t>(symbol)] = code;
     }
+    file.close();
 }
 
-std::string HEG::Map::getCodeForSymbol(char symbol) {
-	return this->mp_[symbol];
-}
-
+std::string HEG::Map::getCodeForSymbol(char symbol) { return this->mp_[symbol]; }
